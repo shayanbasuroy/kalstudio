@@ -54,7 +54,7 @@ export const AssignmentEmailTemplate: React.FC<Readonly<AssignmentEmailProps>> =
     </div>
 
     <div style={{ marginBottom: '40px' }}>
-      <a href="http://localhost:3000/dashboard/employee/projects" style={{
+      <a href={`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/employee/projects`} style={{
         backgroundColor: '#1a1a1a',
         color: '#ffffff',
         padding: '16px 32px',

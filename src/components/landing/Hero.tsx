@@ -75,7 +75,7 @@ export default function Hero() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="w-full flex justify-center pb-12 md:pb-20 overflow-hidden bg-brand-offwhite">
+    <section ref={sectionRef} id="home" className="w-full flex justify-center pb-12 md:pb-20 overflow-hidden bg-brand-offwhite">
       <div className="w-full max-w-[1800px] flex flex-col items-center">
         {/* Main Editorial Block */}
         <div className="w-full px-6 md:px-16 lg:px-24 pt-8 md:pt-10 pb-12 md:pb-16 relative flex flex-col items-center md:items-start text-center md:text-left">

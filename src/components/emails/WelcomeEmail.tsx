@@ -33,7 +33,7 @@ export const WelcomeEmailTemplate: React.FC<Readonly<WelcomeEmailProps>> = ({
     </p>
 
     <div style={{ marginBottom: '40px' }}>
-      <a href="http://localhost:3000/login" style={{
+      <a href={`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login`} style={{
         backgroundColor: '#1a1a1a',
         color: '#ffffff',
         padding: '16px 32px',
