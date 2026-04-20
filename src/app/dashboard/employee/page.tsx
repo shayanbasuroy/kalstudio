@@ -1,42 +1,58 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import MetricCard from '@/components/dashboard/MetricCard'
-import { Briefcase, DollarSign, FolderOpen, Loader2, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
-
-// Mock Data
-const myClients = [
-  { id: 1, name: 'Local Resto', status: 'lead', value: '₹20,000' },
-  { id: 2, name: 'Gym Pro', status: 'active', value: '₹40,000' }
-]
-
-const myProjects = [
-  { id: 1, name: 'Local Resto - Landing', status: 'In Progress', deadline: 'Oct 24' }
-]
+import { Briefcase, DollarSign, FolderOpen, Loader2 } from 'lucide-react'
 
 export default function EmployeeDashboard() {
-  const [role, setRole] = useState<'sales' | 'developer' | 'owner' | null>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [data, setData] = useState<any>({ gigs: [], metrics: { active: 0, earnings: 0, pending: 0 } })
   const [loading, setLoading] = useState(true)
+  
+  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    async function checkRole() {
+    async function fetchEmployeeData() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profile } = await supabase
+        // 1. Fetch Profile
+        const { data: profileData } = await supabase
           .from('users')
-          .select('role')
+          .select('role, status')
           .eq('id', user.id)
           .single()
         
-        setRole(profile?.role as any || 'sales') 
-      } else {
-        setRole('sales') 
+          // Owners can view this page, others need redirection check
+          if (profileData?.role !== 'owner' && profileData?.role !== 'sales' && profileData?.role !== 'developer') {
+            router.push('/login')
+            return
+          }
+        setProfile(profileData)
+
+        // 2. Fetch Payouts (Gigs) and Stats
+        const { data: myPayouts } = await supabase
+          .from('payouts')
+          .select('*, gigs(*, clients(name))')
+          .eq('user_id', user.id)
+
+        const activeGigs = myPayouts?.filter(p => p.gigs.status !== 'completed').length || 0
+        const totalEarnings = myPayouts?.filter(p => p.is_paid).reduce((acc, p) => acc + Number(p.amount), 0) || 0
+        const pendingPayouts = myPayouts?.filter(p => !p.is_paid).reduce((acc, p) => acc + Number(p.amount), 0) || 0
+
+        setData({
+          gigs: myPayouts || [],
+          metrics: {
+            active: activeGigs,
+            earnings: totalEarnings,
+            pending: pendingPayouts
+          }
+        })
       }
       setLoading(false)
     }
-    checkRole()
+    fetchEmployeeData()
   }, [])
 
   if (loading) {
@@ -46,6 +62,8 @@ export default function EmployeeDashboard() {
       </div>
     )
   }
+
+  const role = profile?.role || 'sales'
 
   return (
     <div className="space-y-16 animate-in fade-in duration-700 slide-in-from-bottom-4">
@@ -60,94 +78,62 @@ export default function EmployeeDashboard() {
           </h1>
         </div>
         <div className="max-w-[200px] text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic text-right md:text-left">
-          Focus is the catalyst for conversion.
+          Your individual contribution is the pillar of our collective success.
         </div>
       </div>
 
-      {/* Sales Section */}
-      {(role === 'sales' || role === 'owner') && (
-        <div className="space-y-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 border-l border-t border-brand-charcoal/10">
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="Total Deals" value="12" trend="+3" trendUp={true} icon={Briefcase} />
-            </div>
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="Active Clients" value="5" trend="0" trendUp={true} icon={Briefcase} />
-            </div>
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="My Earnings" value="₹45k" trend="+₹5k" trendUp={true} icon={DollarSign} />
-            </div>
-          </div>
-          
-          <div className="space-y-8">
-            <div className="flex justify-between items-baseline border-b border-brand-charcoal/10 pb-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-brand-charcoal">My Personal Pipeline</h2>
-              <button className="text-[10px] bg-brand-charcoal text-brand-offwhite px-6 py-2 rounded-full font-bold uppercase tracking-widest hover:bg-brand-gold transition-colors">
-                + New Lead
-              </button>
-            </div>
-
-            <div className="space-y-0 border-t border-brand-charcoal/5">
-              {myClients.map((client) => (
-                <div key={client.id} className="grid grid-cols-[2fr_1fr_1fr] items-center py-8 border-b border-brand-charcoal/10 group hover:bg-brand-charcoal/[0.02] transition-colors px-4">
-                  <span className="text-lg font-bold text-brand-charcoal tracking-tight">{client.name}</span>
-                  <div className="flex justify-center">
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 border ${
-                      client.status === 'active' ? 'border-brand-gold text-brand-gold' : 'border-brand-charcoal/20 text-brand-charcoal/40'
-                    }`}>
-                      {client.status}
-                    </span>
-                  </div>
-                  <div className="text-right font-bold text-brand-charcoal">
-                    {client.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 border-l border-t border-brand-charcoal/10">
+        <div className="border-r border-b border-brand-charcoal/10">
+          <MetricCard title="Active Gigs" value={data.metrics.active} trend="Personal" trendUp={true} icon={Briefcase} />
         </div>
-      )}
-
-      {/* Developer Section */}
-      {role === 'developer' && (
-        <div className="space-y-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 border-l border-t border-brand-charcoal/10">
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="Active Projects" value="2" trend="-1" trendUp={false} icon={FolderOpen} />
-            </div>
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="Completed" value="8" trend="+1" trendUp={true} icon={FolderOpen} />
-            </div>
-            <div className="border-r border-b border-brand-charcoal/10">
-              <MetricCard title="Profit Share" value="₹1.2L" trend="+₹10k" trendUp={true} icon={DollarSign} />
-            </div>
-          </div>
-          
-          <div className="space-y-10">
-            <div className="flex justify-between items-baseline border-b border-brand-charcoal/10 pb-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-brand-charcoal">Assigned Projects</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-12">
-              {myProjects.map(proj => (
-                <div key={proj.id} className="group border border-brand-charcoal/10 p-8 hover:border-brand-gold transition-colors">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-brand-charcoal tracking-tighter leading-none mb-2">{proj.name}</h3>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40">Deadline: {proj.deadline}</p>
-                    </div>
-                    <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-brand-gold/10 text-brand-gold">
-                      {proj.status}
-                    </span>
-                  </div>
-                  <button className="w-full text-center py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-offwhite bg-brand-charcoal hover:bg-brand-gold transition-colors">
-                    Update Progress
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="border-r border-b border-brand-charcoal/10">
+          <MetricCard title="Total Earnings" value={`₹${data.metrics.earnings.toLocaleString()}`} trend="Settled" trendUp={true} icon={DollarSign} />
         </div>
-      )}
+        <div className="border-r border-b border-brand-charcoal/10">
+          <MetricCard title="Pending Payouts" value={`₹${data.metrics.pending.toLocaleString()}`} trend="Processing" trendUp={true} icon={FolderOpen} />
+        </div>
+      </div>
+      
+      {/* List Section */}
+      <div className="space-y-8">
+        <div className="flex justify-between items-baseline border-b border-brand-charcoal/10 pb-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-brand-charcoal">
+            {role === 'developer' ? 'Build Assignment' : 'Sales Pipeline'}
+          </h2>
+          <button 
+            onClick={() => router.push(role === 'developer' ? '/dashboard/employee/projects' : '/dashboard/employee/clients')}
+            className="text-[10px] bg-brand-charcoal text-brand-offwhite px-6 py-2 rounded-full font-bold uppercase tracking-widest hover:bg-brand-gold transition-colors"
+          >
+            {role === 'developer' ? 'Gigs Manager' : '+ Add Lead'}
+          </button>
+        </div>
+
+        <div className="space-y-0 border-t border-brand-charcoal/5">
+          {data.gigs.length > 0 ? data.gigs.map((item: any) => (
+            <div key={item.gigs.id} className="grid grid-cols-[2fr_1fr_1fr] items-center py-8 border-b border-brand-charcoal/10 group hover:bg-brand-charcoal/[0.02] transition-colors px-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-lg font-bold text-brand-charcoal tracking-tight">{item.gigs.clients?.name}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40">{item.gigs.service_type}</span>
+              </div>
+              <div className="flex justify-center">
+                <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 border ${
+                  item.gigs.status === 'in_progress' ? 'border-brand-gold text-brand-gold' : 'border-brand-charcoal/20 text-brand-charcoal/40'
+                }`}>
+                  {item.gigs.status.replace('_', ' ')}
+                </span>
+              </div>
+              <div className="text-right flex flex-col items-end">
+                <span className="text-sm font-bold text-brand-charcoal tabular-nums">₹{Number(item.amount).toLocaleString()}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-brand-charcoal/30">My Split</span>
+              </div>
+            </div>
+          )) : (
+            <p className="py-20 text-center text-xs font-bold uppercase tracking-widest text-brand-charcoal/20">No active assignments in your pipeline</p>
+          )}
+        </div>
+      </div>
+
     </div>
   )
 }

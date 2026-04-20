@@ -25,18 +25,45 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('email_not_confirmed')) {
+        setError("Please check your inbox to confirm your email before logging in.")
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
 
     if (user) {
-      // Fetch role to determine redirect
-      const { data: profile } = await supabase
+      // 1. Fetch role and status
+      let { data: profile, error: profileError } = await supabase
         .from('users')
-        .select('role')
+        .select('role, status')
         .eq('id', user.id)
         .single()
+
+      // 2. AUTO-REPAIR: Gracefully handle missing profiles or race conditions with the trigger
+      if (profileError || !profile) {
+        const { data: newProfile, error: repairError } = await supabase
+          .from('users')
+          .upsert({ 
+            id: user.id, 
+            email: user.email!, 
+            name: user.user_metadata?.full_name || 'New User',
+            role: user.user_metadata?.role || 'sales',
+            status: 'pending'
+          }, { onConflict: 'id' })
+          .select('role, status')
+          .single()
+        
+        if (repairError) {
+          console.error("Repair error:", repairError)
+          setError("Profile sync failed. Please contact support.")
+          setLoading(false)
+          return
+        }
+        profile = newProfile
+      }
 
       if (profile?.role === 'owner') {
         router.push('/dashboard/owner')

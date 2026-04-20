@@ -56,11 +56,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Overview', href: '/dashboard/owner', icon: LayoutDashboard },
     { name: 'Clients', href: '/dashboard/owner/clients', icon: Users },
     { name: 'Projects', href: '/dashboard/owner/projects', icon: FolderOpen },
+    { name: 'Staff', href: '/dashboard/owner/employees', icon: Users },
     { name: 'Revenue', href: '/dashboard/owner/revenue', icon: DollarSign },
+    { name: 'Employee View', href: '/dashboard/employee', icon: LayoutDashboard },
   ] : [
     { name: 'My Dashboard', href: '/dashboard/employee', icon: LayoutDashboard },
     { name: 'Clients/Leads', href: '/dashboard/employee/clients', icon: Users },
     { name: 'Projects', href: '/dashboard/employee/projects', icon: FolderOpen },
+    { name: 'Payment Info', href: '/dashboard/employee/settings', icon: DollarSign },
   ]
 
   return (

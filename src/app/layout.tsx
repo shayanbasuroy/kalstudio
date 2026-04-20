@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
+import SmoothScroll from "@/components/providers/SmoothScroll";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,9 +32,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
+      </body>
     </html>
   );
 }

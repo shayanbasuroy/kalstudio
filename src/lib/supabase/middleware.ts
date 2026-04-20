@@ -48,33 +48,22 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isDashboardRoute && user) {
-    // Get user role from the user metadata (or you'd fetch from your users table)
-    // For this example, assuming role is in user metadata or we can fetch it
-    // Wait, the PRD says 'role: owner | sales | developer' is in the users table.
-    // If it's a separate table, we'd query it. Let's fetch from the `users` table since supabase schema specifies it.
-    // user.id is the UUID.
     const { data: profile } = await supabase
       .from('users')
-      .select('role')
+      .select('role, status')
       .eq('id', user.id)
       .single()
 
     const role = profile?.role
+    const status = profile?.status
 
+    // Role-based Protection
     const isOwnerRoute = request.nextUrl.pathname.startsWith('/dashboard/owner')
     const isEmployeeRoute = request.nextUrl.pathname.startsWith('/dashboard/employee')
 
     if (isOwnerRoute && role !== 'owner') {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard/employee' // Or fallback
-      return NextResponse.redirect(url)
-    }
-
-    if (isEmployeeRoute && role === 'owner') {
-      // Owners can probably access everything, or we direct them back
-      // Let's redirect owners to owner dashboard if they hit employee dashboard
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard/owner'
+      url.pathname = '/dashboard/employee'
       return NextResponse.redirect(url)
     }
   }
