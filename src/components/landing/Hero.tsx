@@ -66,8 +66,17 @@ export default function Hero() {
         })
       }
 
-      window.addEventListener('mousemove', handleMouseMove)
-      return () => window.removeEventListener('mousemove', handleMouseMove)
+      // 3. Continuous Ticker Loop
+      gsap.to('.hero-ticker-track', {
+        xPercent: -50,
+        repeat: -1,
+        duration: 25,
+        ease: 'none',
+      })
+
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove)
+      }
 
     }, sectionRef)
 
@@ -141,14 +150,23 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Divider Strip */}
-        <div className="w-full px-6 md:px-16 lg:px-24 py-8 border-y border-brand-charcoal/10 flex flex-wrap md:flex-nowrap justify-center md:justify-between items-center gap-4 text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-brand-charcoal/80">
-           {['Digital Architecture', 'Web Design & Development', 'Funnel Optimization', 'Photography'].map((item, i) => (
-             <span key={i} className={`hero-divider-item flex items-center gap-3 ${i > 1 ? 'hidden sm:flex' : 'flex'}`}>
-               {i > 0 && <span className="hidden md:block w-1.5 h-1.5 bg-brand-gold/30 rounded-full"></span>}
-               {item}
-             </span>
-           ))}
+        {/* Divider Ticker Strip */}
+        <div className="w-full py-8 md:py-10 border-y border-brand-charcoal/10 overflow-hidden bg-brand-offwhite/50 relative">
+          <div className="hero-ticker-track flex whitespace-nowrap items-center">
+            {/* Array doubled for seamless loop */}
+            {[...Array(4)].map((_, loopIndex) => (
+              <div key={loopIndex} className="flex shrink-0">
+                {['Digital Architecture', 'Web Design & Development', 'Funnel Optimization', 'Photography'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-8 md:gap-12 px-8 md:px-12">
+                    <span className="w-1.5 h-1.5 bg-brand-gold rounded-full shrink-0"></span>
+                    <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.3em] text-brand-charcoal/80 hover:text-brand-gold transition-colors cursor-default">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
