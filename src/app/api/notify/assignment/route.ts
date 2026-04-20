@@ -2,9 +2,8 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { AssignmentEmailTemplate } from '@/components/emails/AssignmentEmail';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const { email, name, clientName, serviceType, deadline } = await request.json();
 

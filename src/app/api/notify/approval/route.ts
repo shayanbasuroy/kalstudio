@@ -2,9 +2,8 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { ApprovalEmailTemplate } from '@/components/emails/ApprovalEmail';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const { email, name, role } = await request.json();
 
