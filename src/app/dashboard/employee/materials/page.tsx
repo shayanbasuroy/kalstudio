@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { BookOpen, ExternalLink, Loader2, Search, Tool } from 'lucide-react'
+import { BookOpen, ExternalLink, Loader2 } from 'lucide-react'
 
 interface Material {
   id: string
