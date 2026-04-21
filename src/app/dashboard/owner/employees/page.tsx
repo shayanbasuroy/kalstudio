@@ -60,13 +60,12 @@ export default function EmployeeManagementPage() {
         const approvedUser = employees.find(e => e.id === id)
         if (approvedUser) {
           try {
-            await fetch('/api/notify/approval', {
+            await fetch('/api/notify/welcome', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 email: approvedUser.email,
-                name: approvedUser.name,
-                role: approvedUser.role
+                name: approvedUser.name
               })
             })
           } catch (err) {
@@ -74,6 +73,24 @@ export default function EmployeeManagementPage() {
           }
         }
       }
+    }
+    setActionLoading(null)
+  }
+
+  const handleResendEmail = async (emp: EmployeeProfile) => {
+    setActionLoading(`resend-${emp.id}`)
+    try {
+      await fetch('/api/notify/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emp.email,
+          name: emp.name
+        })
+      })
+      // Optional: Add a success toast/notification here if you have one
+    } catch (err) {
+      console.error("Failed to resend notification:", err)
     }
     setActionLoading(null)
   }
@@ -214,9 +231,23 @@ export default function EmployeeManagementPage() {
                     {emp.phone}
                   </td>
                   <td className="py-6 text-right">
-                    <div className="flex items-center justify-end gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-sage">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-sage animate-pulse"></div>
-                      Verified
+                    <div className="flex items-center justify-end gap-4">
+                      <button
+                        onClick={() => handleResendEmail(emp)}
+                        disabled={!!actionLoading}
+                        className="p-2 text-brand-charcoal/30 hover:text-brand-gold transition-colors"
+                        title="Resend Welcome Email"
+                      >
+                        {actionLoading === `resend-${emp.id}` ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Mail className="w-4 h-4" />
+                        )}
+                      </button>
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-brand-sage">
+                        <div className="w-1.5 h-1.5 rounded-full bg-brand-sage animate-pulse"></div>
+                        Verified
+                      </div>
                     </div>
                   </td>
                 </tr>

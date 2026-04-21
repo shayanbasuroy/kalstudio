@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { LayoutDashboard, Users, FolderOpen, LogOut, Loader2, DollarSign } from 'lucide-react'
+import { LayoutDashboard, Users, FolderOpen, LogOut, Loader2, DollarSign, Library } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<'owner' | 'sales' | 'developer' | null>(null)
@@ -57,12 +57,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Clients', href: '/dashboard/owner/clients', icon: Users },
     { name: 'Projects', href: '/dashboard/owner/projects', icon: FolderOpen },
     { name: 'Staff', href: '/dashboard/owner/employees', icon: Users },
+    { name: 'Materials', href: '/dashboard/owner/materials', icon: Library },
     { name: 'Revenue', href: '/dashboard/owner/revenue', icon: DollarSign },
     { name: 'Employee View', href: '/dashboard/employee', icon: LayoutDashboard },
   ] : [
     { name: 'My Dashboard', href: '/dashboard/employee', icon: LayoutDashboard },
     { name: 'Clients/Leads', href: '/dashboard/employee/clients', icon: Users },
     { name: 'Projects', href: '/dashboard/employee/projects', icon: FolderOpen },
+    { name: 'Materials', href: '/dashboard/employee/materials', icon: Library },
     { name: 'Payment Info', href: '/dashboard/employee/settings', icon: DollarSign },
   ]
 

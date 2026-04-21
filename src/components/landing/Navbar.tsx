@@ -23,7 +23,7 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-10">
-          <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-brand-charcoal">
+          <div className="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-brand-charcoal">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
@@ -36,9 +36,24 @@ export default function Navbar() {
             ))}
           </div>
 
+          <div className="hidden md:flex items-center gap-6">
+            <Link 
+              href="/login" 
+              className="text-[11px] font-bold uppercase tracking-widest text-brand-charcoal/60 hover:text-brand-gold transition-colors"
+            >
+              Log In
+            </Link>
+            <Link 
+              href="/signup" 
+              className="px-6 py-3 bg-brand-gold text-brand-offwhite text-[10px] font-bold uppercase tracking-widest hover:bg-brand-charcoal transition-all shadow-xl shadow-brand-gold/10"
+            >
+              Join the Team
+            </Link>
+          </div>
+
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="z-[110] w-10 md:w-12 h-10 md:h-12 bg-brand-gold flex items-center justify-center hover:bg-brand-charcoal transition-colors rounded-full md:rounded-none"
+            className="z-[110] w-10 md:w-12 h-10 md:h-12 bg-brand-gold flex items-center justify-center hover:bg-brand-charcoal transition-colors rounded-full md:rounded-none lg:hidden"
           >
             {isOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
           </button>
@@ -60,13 +75,22 @@ export default function Navbar() {
                 {link.name}.
               </Link>
             ))}
-            <Link 
-              href="/signup" 
-              onClick={() => setIsOpen(false)}
-              className="mt-8 px-10 py-4 bg-brand-gold text-brand-offwhite text-[11px] font-bold uppercase tracking-widest hover:bg-brand-charcoal transition-all"
-            >
-              Join the Team
-            </Link>
+            <div className="flex flex-col gap-4 mt-8 w-full px-12">
+              <Link 
+                href="/login" 
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center px-10 py-4 border border-brand-charcoal/10 text-brand-charcoal text-[11px] font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-offwhite transition-all"
+              >
+                Log In
+              </Link>
+              <Link 
+                href="/signup" 
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center px-10 py-4 bg-brand-gold text-brand-offwhite text-[11px] font-bold uppercase tracking-widest hover:bg-brand-charcoal transition-all"
+              >
+                Join the Team
+              </Link>
+            </div>
           </div>
           
           <div className="absolute bottom-12 text-[10px] uppercase font-bold tracking-[0.3em] text-brand-charcoal/20">
