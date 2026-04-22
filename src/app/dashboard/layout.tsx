@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
@@ -71,6 +71,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [userId, supabase]);
 
   // Global search with debounce
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -98,6 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, supabase]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -155,7 +157,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ]
 
   return (
-    <div className="min-h-screen bg-brand-offwhite flex font-sans">
+    <div className="h-screen bg-brand-offwhite flex font-sans">
       {/* Sidebar - Editorial Dark */}
       <aside className="w-72 bg-brand-charcoal text-brand-offwhite flex flex-col hidden md:flex border-r border-white/5">
         <div className="p-10 border-b border-white/10">
@@ -307,7 +309,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col">
         {/* Mobile Header */}
         <div className="md:hidden bg-brand-charcoal p-6 flex justify-between items-center border-b border-white/5">
           <Link href="/" className="flex items-center gap-3">
