@@ -123,11 +123,9 @@ export default function AboutStats() {
             <h3 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-charcoal mb-4">
               Our Mission
             </h3>
-            <p className="text-xs md:text-sm text-brand-charcoal/60 max-w-sm mb-8 leading-relaxed">
-              Our goal is to create work that looks beautiful, performs
-              effectively, and leaves a lasting impact on your brand&apos;s digital
-              journey.
-            </p>
+             <p className="text-xs md:text-sm text-brand-charcoal/60 max-w-sm mb-8 leading-relaxed">
+               Our goal is to create work that looks beautiful, performs effectively, and leaves a lasting impact on your brand&apos;s digital journey.
+             </p>
             <div className="w-full max-w-md aspect-square bg-brand-offwhite relative rounded border border-brand-charcoal/10 overflow-hidden shadow-sm perspective-1000">
               {/* Arch shape */}
               <div
@@ -139,12 +137,11 @@ export default function AboutStats() {
                 </div>
               </div>
               {/* Quote overlay on the image */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-brand-charcoal to-transparent">
-                <p className="text-brand-offwhite text-[10px] md:text-xs font-medium italic leading-relaxed">
-                  &ldquo;We don&apos;t just build websites &mdash; we build digital identities
-                  that command attention.&rdquo;
-                </p>
-              </div>
+               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-brand-charcoal to-transparent">
+                 <p className="text-brand-offwhite text-[10px] md:text-xs font-medium italic leading-relaxed">
+                   &ldquo;We don&apos;t just build websites &mdash; we build digital identities that command attention.&rdquo;
+                 </p>
+               </div>
             </div>
           </div>
 
@@ -161,10 +158,9 @@ export default function AboutStats() {
               <div className="hidden md:block absolute inset-0 bg-brand-gold/5 blur-3xl rounded-full -z-10 group-hover:bg-brand-gold/10 transition-colors"></div>
               <div className="bg-white p-8 md:p-12 shadow-2xl border border-brand-charcoal/5 relative z-10 lg:-ml-12 min-h-[220px] md:min-h-[280px] flex flex-col justify-between overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <h3 className="text-xl md:text-3xl font-bold text-brand-charcoal leading-tight relative z-10">
-                  Powering brands through elite code, high-conversion strategy,
-                  and editorial design.
-                </h3>
+                 <h3 className="text-xl md:text-3xl font-bold text-brand-charcoal leading-tight relative z-10">
+                   Powering brands through elite code, high-conversion strategy, and editorial design.
+                 </h3>
                 <div className="flex justify-between items-center mt-10 relative z-10">
                   <span className="text-[9px] md:text-[10px] text-brand-charcoal/50 font-bold uppercase tracking-widest">
                     Based in India / Global Output

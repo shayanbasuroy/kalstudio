@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Library, Plus, Trash2, ExternalLink, Loader2, FileText, Upload, X } from 'lucide-react'
+import { Library, Plus, Trash2, ExternalLink, Loader2, FileText, Upload, X, Search, Edit } from 'lucide-react'
 
 interface Material {
   id: string
@@ -9,35 +9,47 @@ interface Material {
   description: string
   url: string
   category: string
+  audience: 'all' | 'sales' | 'developer'
   created_at: string
 }
 
 const CATEGORIES = ['Strategy', 'Design Assets', 'Legal/Templates', 'Training']
+const AUDIENCE_OPTIONS = ['all', 'sales', 'developer']
 
 export default function MaterialsManagementPage() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null)
   const [adding, setAdding] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeAudience, setActiveAudience] = useState("all")
+  const [activeCategory, setActiveCategory] = useState("All")
   const [uploading, setUploading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [urlMode, setUrlMode] = useState(false)
-  const [formData, setFormData] = useState({ title: '', description: '', url: '', category: 'Strategy' })
+  const [formData, setFormData] = useState({ title: '', description: '', url: '', category: 'Strategy', audience: 'all' })
   const supabase = createClient()
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   const fetchMaterials = useCallback(async () => {
     setLoading(true)
+    setError(null)
     const { data, error } = await supabase
       .from('materials')
       .select('*')
       .order('created_at', { ascending: false })
     
-    if (!error && data) setMaterials(data)
+    if (error) {
+      setError('Failed to load materials: ' + error.message)
+    } else if (data) {
+      setMaterials(data)
+    }
     setLoading(false)
   }, [supabase])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+
     fetchMaterials()
   }, [fetchMaterials])
 
@@ -51,9 +63,9 @@ export default function MaterialsManagementPage() {
       setUploading(true)
       const fileExt = file.name.split('.').pop()
       const fileName = `materials/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-      const { data: _, error: uploadError } = await supabase.storage
-        .from('materials')
-        .upload(fileName, file)
+       const { error: uploadError } = await supabase.storage
+         .from('materials')
+         .upload(fileName, file)
 
       if (uploadError) {
         alert('Failed to upload file: ' + uploadError.message)
@@ -70,19 +82,38 @@ export default function MaterialsManagementPage() {
       setUploading(false)
     }
 
-    const { data, error } = await supabase
-      .from('materials')
-      .insert([{ title: formData.title, description: formData.description, url, category: formData.category }])
-      .select()
+    let data, error
+    if (editingMaterial) {
+      // Update existing material
+      ({ data, error } = await supabase
+        .from('materials')
+        .update({ title: formData.title, description: formData.description, url, category: formData.category, audience: formData.audience })
+        .eq('id', editingMaterial.id)
+        .select())
+    } else {
+      // Insert new material
+      ({ data, error } = await supabase
+        .from('materials')
+        .insert([{ title: formData.title, description: formData.description, url, category: formData.category, audience: formData.audience }])
+        .select())
+    }
     
     if (!error && data) {
-      setMaterials([data[0], ...materials])
-      setFormData({ title: '', description: '', url: '', category: 'Strategy' })
+      if (editingMaterial) {
+        // Replace the updated material in the list
+        setMaterials(materials.map(m => m.id === editingMaterial.id ? data[0] : m))
+        setEditingMaterial(null)
+      } else {
+        setMaterials([data[0], ...materials])
+      }
+      setFormData({ title: '', description: '', url: '', category: 'Strategy', audience: 'all' })
       setFile(null)
       setUrlMode(false)
       dialogRef.current?.close()
     } else {
-      alert('Failed to save material: ' + (error?.message || 'Unknown error'))
+      const errMsg = 'Failed to save material: ' + (error?.message || 'Unknown error')
+      setError(errMsg)
+      alert(errMsg)
     }
     setAdding(false)
   }
@@ -90,10 +121,33 @@ export default function MaterialsManagementPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to remove this material?")) return
     const { error } = await supabase.from('materials').delete().eq('id', id)
-    if (!error) setMaterials(materials.filter(m => m.id !== id))
+    if (error) {
+      setError('Failed to delete material: ' + error.message)
+      alert('Failed to delete material: ' + error.message)
+    } else {
+      setMaterials(materials.filter(m => m.id !== id))
+    }
   }
 
   const isPdf = (url: string) => url.toLowerCase().endsWith('.pdf')
+
+  const filtered = materials.filter((m) => {
+    // Category filter
+    if (activeCategory !== "All" && m.category !== activeCategory) return false;
+    
+    // Audience filter
+    if (activeAudience !== "all" && m.audience !== activeAudience) return false;
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const inTitle = m.title.toLowerCase().includes(query);
+      const inDesc = m.description.toLowerCase().includes(query);
+      if (!inTitle && !inDesc) return false;
+    }
+    
+    return true;
+  });
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700">
@@ -115,26 +169,116 @@ export default function MaterialsManagementPage() {
         </button>
       </div>
 
+      {/* Search & Filters */}
+      <div className="space-y-6">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        {/* Search Bar */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-charcoal/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search materials by title or description..."
+            className="w-full bg-white border border-brand-charcoal/10 pl-10 pr-10 py-3 text-sm text-brand-charcoal placeholder:text-brand-charcoal/30 focus:border-brand-gold outline-none transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              <X className="w-3.5 h-3.5 text-brand-charcoal/30 hover:text-brand-charcoal transition-colors" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-6">
+          {/* Audience Filter */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/60 mb-2">Filter by Role</p>
+            <div className="flex flex-wrap gap-2">
+              {['all', 'sales', 'developer'].map((aud) => (
+                <button
+                  key={aud}
+                  onClick={() => setActiveAudience(aud)}
+                  className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest transition-all ${
+                    activeAudience === aud
+                      ? "bg-brand-charcoal text-brand-offwhite"
+                      : "bg-white border border-brand-charcoal/5 text-brand-charcoal/60 hover:border-brand-gold hover:text-brand-gold"
+                  }`}
+                >
+                  {aud === 'all' ? 'All' : aud === 'sales' ? 'Sales' : 'Developer'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/60 mb-2">Filter by Category</p>
+            <div className="flex flex-wrap gap-2">
+              {['All', ...CATEGORIES].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest transition-all ${
+                    activeCategory === cat
+                      ? "bg-brand-charcoal text-brand-offwhite"
+                      : "bg-white border border-brand-charcoal/5 text-brand-charcoal/60 hover:border-brand-gold hover:text-brand-gold"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="flex justify-center p-32">
           <Loader2 className="w-8 h-8 animate-spin text-brand-gold" />
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {materials.map((m) => (
+           {filtered.map((m) => (
             <div key={m.id} className="bg-white border border-brand-charcoal/10 p-8 flex flex-col justify-between group hover:border-brand-gold transition-all">
               <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-brand-offwhite border border-brand-charcoal/5 text-brand-gold">
-                    {m.category}
-                  </span>
-                  <button 
-                    onClick={() => handleDelete(m.id)}
-                    className="p-2 text-brand-charcoal/10 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                 <div className="flex justify-between items-start">
+                   <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-brand-offwhite border border-brand-charcoal/5 text-brand-gold">
+                     {m.category}
+                   </span>
+                   <div className="flex gap-1">
+                     <button 
+                       onClick={() => {
+                         setEditingMaterial(m)
+                         setFormData({
+                           title: m.title,
+                           description: m.description,
+                           url: m.url,
+                           category: m.category,
+                           audience: m.audience
+                         })
+                         setUrlMode(!m.url.toLowerCase().endsWith('.pdf'))
+                         setFile(null)
+                         dialogRef.current?.showModal()
+                       }}
+                       className="p-2 text-brand-charcoal/10 hover:text-brand-gold transition-colors"
+                     >
+                       <Edit className="w-3.5 h-3.5" />
+                     </button>
+                     <button 
+                       onClick={() => handleDelete(m.id)}
+                       className="p-2 text-brand-charcoal/10 hover:text-red-500 transition-colors"
+                     >
+                       <Trash2 className="w-3.5 h-3.5" />
+                     </button>
+                   </div>
+                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-brand-charcoal tracking-tight mb-2 underline decoration-brand-gold/20 flex items-center gap-2">
                     {m.title}
@@ -180,7 +324,7 @@ export default function MaterialsManagementPage() {
               </div>
             </div>
           ))}
-          {materials.length === 0 && (
+           {filtered.length === 0 && (
             <div className="col-span-full py-24 text-center border-2 border-dashed border-brand-charcoal/5 rounded-xl">
               <Library className="w-12 h-12 text-brand-charcoal/10 mx-auto mb-4" />
               <p className="text-sm text-brand-charcoal/30 italic">No materials uploaded yet. Start by adding your first tool.</p>
@@ -193,9 +337,9 @@ export default function MaterialsManagementPage() {
       <dialog ref={dialogRef} className="modal p-0 bg-transparent backdrop:bg-brand-charcoal/40 backdrop:backdrop-blur-sm">
         <div className="bg-brand-offwhite w-full max-w-md p-10 shadow-2xl border border-brand-charcoal/10">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-2xl font-bold tracking-tighter text-brand-charcoal">New Material.</h3>
+            <h3 className="text-2xl font-bold tracking-tighter text-brand-charcoal">{editingMaterial ? 'Edit Material.' : 'New Material.'}</h3>
             <button 
-              onClick={() => { dialogRef.current?.close(); setFile(null); setUrlMode(false); setFormData({ title: '', description: '', url: '', category: 'Strategy' }) }}
+               onClick={() => { dialogRef.current?.close(); setFile(null); setUrlMode(false); setEditingMaterial(null); setFormData({ title: '', description: '', url: '', category: 'Strategy', audience: 'all' }) }}
               className="text-brand-charcoal/40 hover:text-brand-charcoal"
             >
               <X className="w-5 h-5" />
@@ -291,6 +435,17 @@ export default function MaterialsManagementPage() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/60">Audience</label>
+              <select 
+                value={formData.audience}
+                onChange={(e) => setFormData({...formData, audience: e.target.value as 'all' | 'sales' | 'developer'})}
+                className="w-full bg-white border border-brand-charcoal/10 px-4 py-3 text-sm focus:border-brand-gold outline-none transition-colors"
+              >
+                {AUDIENCE_OPTIONS.map(aud => <option key={aud} value={aud}>{aud === 'all' ? 'All' : aud === 'sales' ? 'Sales' : 'Developer'}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/60">Short Description</label>
               <textarea 
                 rows={3}
@@ -311,7 +466,7 @@ export default function MaterialsManagementPage() {
               ) : adding ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                'Save Material'
+                 editingMaterial ? 'Update Material' : 'Save Material'
               )}
             </button>
           </form>
