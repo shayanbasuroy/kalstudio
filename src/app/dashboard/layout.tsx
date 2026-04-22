@@ -157,7 +157,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ]
 
   return (
-    <div className="h-screen bg-brand-offwhite flex font-sans">
+    <div className="min-h-screen bg-brand-offwhite flex font-sans">
       {/* Sidebar - Editorial Dark */}
       <aside className="w-72 bg-brand-charcoal text-brand-offwhite flex flex-col hidden md:flex border-r border-white/5">
         <div className="p-10 border-b border-white/10">
@@ -309,7 +309,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col h-full">
         {/* Mobile Header */}
         <div className="md:hidden bg-brand-charcoal p-6 flex justify-between items-center border-b border-white/5">
           <Link href="/" className="flex items-center gap-3">
@@ -321,7 +321,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <div className="p-8 md:p-12 lg:p-16 max-w-[1400px] mx-auto">
             {children}
           </div>
