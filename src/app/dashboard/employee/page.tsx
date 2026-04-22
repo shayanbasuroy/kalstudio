@@ -5,9 +5,44 @@ import { useRouter } from 'next/navigation'
 import MetricCard from '@/components/dashboard/MetricCard'
 import { Briefcase, DollarSign, FolderOpen, Loader2 } from 'lucide-react'
 
+interface Profile {
+  role: 'owner' | 'sales' | 'developer'
+  status: string
+}
+
+interface Client {
+  name: string
+}
+
+interface Gig {
+  id: string
+  service_type: string
+  status: string
+  deadline: string | null
+  clients: Client
+}
+
+interface Payout {
+  amount: string | number
+  is_paid: boolean
+  proof_url: string | null
+  gigs: Gig
+}
+
+interface Metrics {
+  active: number
+  earnings: number
+  pending: number
+}
+
+interface DashboardData {
+  gigs: Payout[]
+  metrics: Metrics
+}
+
 export default function EmployeeDashboard() {
-  const [profile, setProfile] = useState<any>(null)
-  const [data, setData] = useState<any>({ gigs: [], metrics: { active: 0, earnings: 0, pending: 0 } })
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [data, setData] = useState<DashboardData>({ gigs: [], metrics: { active: 0, earnings: 0, pending: 0 } })
   const [loading, setLoading] = useState(true)
   
   const router = useRouter()
@@ -53,7 +88,7 @@ export default function EmployeeDashboard() {
       setLoading(false)
     }
     fetchEmployeeData()
-  }, [])
+  }, [router, supabase])
 
   if (loading) {
     return (
@@ -110,7 +145,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="space-y-0 border-t border-brand-charcoal/5">
-          {data.gigs.length > 0 ? data.gigs.map((item: any) => (
+          {data.gigs.length > 0 ? data.gigs.map((item: Payout) => (
             <div key={item.gigs.id} className="grid grid-cols-[2fr_1fr_1fr] items-center py-8 border-b border-brand-charcoal/10 group hover:bg-brand-charcoal/[0.02] transition-colors px-4">
               <div className="flex flex-col gap-1">
                 <span className="text-lg font-bold text-brand-charcoal tracking-tight">{item.gigs.clients?.name}</span>

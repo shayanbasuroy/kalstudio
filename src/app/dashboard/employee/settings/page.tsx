@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { CreditCard, Save, CheckCircle2, Loader2, Landmark } from 'lucide-react'
+import { CreditCard, Save, CheckCircle2, Loader2, Landmark, XCircle } from 'lucide-react'
 
 export default function EmployeeSettings() {
   const [details, setDetails] = useState({
@@ -13,6 +13,7 @@ export default function EmployeeSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -37,26 +38,30 @@ export default function EmployeeSettings() {
       setLoading(false)
     }
     fetchSettings()
-  }, [])
+  }, [supabase])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setSaved(false)
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    const { error } = await supabase
-      .from('payment_details')
-      .upsert({
-        user_id: user?.id,
-        ...details,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' })
+    setActionError(null)
 
-    if (!error) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error } = await supabase
+        .from('payment_details')
+        .upsert({
+          user_id: user?.id,
+          ...details,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
+
+      if (error) throw error
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Failed to save payment details')
     }
     setSaving(false)
   }
@@ -76,7 +81,7 @@ export default function EmployeeSettings() {
           </h1>
         </div>
         <div className="max-w-[200px] text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic">
-          "Transparency and accuracy are the pillars of professional compensation."
+          &ldquo;Transparency and accuracy are the pillars of professional compensation.&rdquo;
         </div>
       </div>
 
@@ -137,6 +142,11 @@ export default function EmployeeSettings() {
           </div>
         </div>
 
+        {actionError && (
+          <div className="text-xs text-red-500 flex items-center gap-1 bg-red-50 p-4 border border-red-100">
+            <XCircle className="w-4 h-4 shrink-0" /> {actionError}
+          </div>
+        )}
         <div className="flex items-center gap-6 pt-4">
           <button 
             type="submit"

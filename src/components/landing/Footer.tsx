@@ -28,7 +28,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-sm text-brand-offwhite/50 leading-relaxed">
-              A creative studio transforming bold ideas into powerful digital structures. We help Kolkata's modern brands build identity, impact, and growth.
+              A creative studio transforming bold ideas into powerful digital structures. We help Kolkata&apos;s modern brands build identity, impact, and growth.
             </p>
           </div>
 

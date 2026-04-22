@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { BookOpen, ExternalLink, Loader2 } from "lucide-react";
+import { BookOpen, ExternalLink, Loader2, FileText, Download } from "lucide-react";
 
 interface Material {
   id: string;
@@ -37,7 +37,7 @@ export default function EmployeeMaterialsPage() {
       setLoading(false);
     }
     fetchMaterials();
-  }, []);
+  }, [supabase]);
 
   const filtered =
     activeCategory === "All"
@@ -58,9 +58,9 @@ export default function EmployeeMaterialsPage() {
             Toolbox.
           </h1>
         </div>
-        <div className="max-w-[280px] text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic">
-          "The right tools aren't just an advantage; they are the foundation of
-          our studio's craftsmanship."
+        <div className="max-w-70 text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic">
+          &quot;The right tools aren&apos;t just an advantage; they are the foundation of
+          our studio&apos;s craftsmanship.&quot;
         </div>
       </div>
 
@@ -87,50 +87,89 @@ export default function EmployeeMaterialsPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filtered.map((m) => (
-            <div
-              key={m.id}
-              className="group relative bg-white border border-brand-charcoal/10 p-10 flex flex-col justify-between hover:border-brand-gold transition-all overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <BookOpen className="w-12 h-12 text-brand-charcoal" />
-              </div>
-
-              <div className="relative space-y-6">
-                <div>
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-brand-gold mb-2 block">
-                    {m.category}
-                  </span>
-                  <h3 className="text-2xl font-bold text-brand-charcoal tracking-tight leading-tight">
-                    {m.title}
-                  </h3>
+          {filtered.map((m) => {
+            const isPdf = m.url && m.url.toLowerCase().endsWith(".pdf");
+            return (
+              <div
+                key={m.id}
+                className="group relative bg-white border border-brand-charcoal/10 p-10 flex flex-col justify-between hover:border-brand-gold transition-all overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <BookOpen className="w-12 h-12 text-brand-charcoal" />
                 </div>
 
-                <p className="text-xs text-brand-charcoal/60 leading-relaxed italic">
-                  "
-                  {m.description ||
-                    "No description provided for this resource."}
-                  "
-                </p>
-              </div>
+                <div className="relative space-y-6">
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-brand-gold mb-2 block">
+                      {m.category}
+                    </span>
+                    <h3 className="text-2xl font-bold text-brand-charcoal tracking-tight leading-tight flex items-center gap-2">
+                      {m.title}
+                      {isPdf && (
+                         <FileText
+                           className="w-5 h-5 text-brand-gold"
+                           aria-label="PDF"
+                         />
+                      )}
+                    </h3>
+                  </div>
 
-              <div className="mt-12 pt-8 border-t border-brand-charcoal/5">
-                <a
-                  href={m.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-8 py-3 bg-brand-charcoal text-white text-[10px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-all"
-                >
-                  Access Tool <ExternalLink className="w-4 h-4" />
-                </a>
+                  <p className="text-xs text-brand-charcoal/60 leading-relaxed italic">
+                    &quot;
+                    {m.description ||
+                      "No description provided for this resource."}
+                    &quot;
+                  </p>
+                </div>
+
+                <div className="mt-12 pt-8 border-t border-brand-charcoal/5 flex flex-col gap-2">
+                  {isPdf ? (
+                    <>
+                      <div className="flex gap-2">
+                        <a
+                          href={m.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-charcoal text-white text-[10px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-all"
+                        >
+                          View PDF <ExternalLink className="w-4 h-4" />
+                        </a>
+                        <a
+                          href={m.url}
+                          download
+                          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-offwhite text-brand-charcoal text-[10px] font-bold uppercase tracking-widest border border-brand-charcoal/10 hover:bg-brand-gold hover:text-white hover:border-brand-gold transition-all"
+                        >
+                          Download <Download className="w-4 h-4" />
+                        </a>
+                      </div>
+                      <div className="border border-brand-charcoal/10 rounded-lg overflow-hidden mt-2">
+                        <iframe
+                          src={m.url}
+                          title={m.title}
+                          className="w-full min-h-100"
+                          style={{ border: "none" }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <a
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 px-8 py-3 bg-brand-charcoal text-white text-[10px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-all"
+                    >
+                      Access Tool <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {filtered.length === 0 && (
             <div className="col-span-full py-24 text-center border-2 border-dashed border-brand-charcoal/5 rounded-2xl">
               <p className="text-sm text-brand-charcoal/30 italic">
-                No resources found in the "{activeCategory}" category.
+                 No resources found in the &quot;{activeCategory}&quot; category.
               </p>
             </div>
           )}

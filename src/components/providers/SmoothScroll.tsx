@@ -26,7 +26,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     // 3. Clean up
     return () => {
       lenis.destroy()
-      gsap.ticker.remove(lenis.raf as any)
+      gsap.ticker.remove(lenis.raf as (time: number) => void)
     }
   }, [])
 

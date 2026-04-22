@@ -125,7 +125,7 @@ export default function AboutStats() {
             </h3>
             <p className="text-xs md:text-sm text-brand-charcoal/60 max-w-sm mb-8 leading-relaxed">
               Our goal is to create work that looks beautiful, performs
-              effectively, and leaves a lasting impact on your brand's digital
+              effectively, and leaves a lasting impact on your brand&apos;s digital
               journey.
             </p>
             <div className="w-full max-w-md aspect-square bg-brand-offwhite relative rounded border border-brand-charcoal/10 overflow-hidden shadow-sm perspective-1000">
@@ -141,8 +141,8 @@ export default function AboutStats() {
               {/* Quote overlay on the image */}
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-brand-charcoal to-transparent">
                 <p className="text-brand-offwhite text-[10px] md:text-xs font-medium italic leading-relaxed">
-                  "We don't just build websites — we build digital identities
-                  that command attention."
+                  &ldquo;We don&apos;t just build websites &mdash; we build digital identities
+                  that command attention.&rdquo;
                 </p>
               </div>
             </div>

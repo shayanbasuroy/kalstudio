@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -55,11 +55,9 @@ export async function updateSession(request: NextRequest) {
       .single()
 
     const role = profile?.role
-    const status = profile?.status
 
     // Role-based Protection
     const isOwnerRoute = request.nextUrl.pathname.startsWith('/dashboard/owner')
-    const isEmployeeRoute = request.nextUrl.pathname.startsWith('/dashboard/employee')
 
     if (isOwnerRoute && role !== 'owner') {
       const url = request.nextUrl.clone()

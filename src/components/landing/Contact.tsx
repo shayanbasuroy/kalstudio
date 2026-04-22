@@ -62,7 +62,7 @@ export default function Contact() {
             <span className="w-4 h-px bg-brand-gold"></span> Start a Project
           </p>
           <h2 className="contact-heading text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-brand-charcoal leading-[1] mb-10">
-            Let's Build<br />
+            Let&apos;s Build<br />
             <span className="text-brand-gold">Together.</span>
           </h2>
           <p className="text-sm text-brand-charcoal/60 max-w-md leading-relaxed mb-12">
@@ -93,7 +93,7 @@ export default function Contact() {
               <input
                 type="text"
                 placeholder={placeholder}
-                value={(form as any)[key]}
+                value={form[key as keyof typeof form]}
                 onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}
                 className="w-full bg-transparent text-lg font-medium text-brand-charcoal placeholder:text-brand-charcoal/20 focus:outline-none"
                 required
@@ -117,7 +117,7 @@ export default function Contact() {
           <div className="pt-10">
             {status === 'success' ? (
               <p className="text-sm font-bold text-brand-sage flex items-center gap-2">
-                ✓ Message received! We'll be in touch within 24 hours.
+                ✓ Message received! We&apos;ll be in touch within 24 hours.
               </p>
             ) : (
               <button

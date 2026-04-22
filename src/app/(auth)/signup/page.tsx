@@ -46,9 +46,31 @@ export default function SignupPage() {
     }
 
     if (user) {
-      // 2. Insert Application Data (Notes, Portfolio)
+      // 2. Ensure user profile exists (in case trigger fails or is delayed)
+      try {
+        const { error: profileError } = await supabase
+          .from('users')
+          .upsert({
+            id: user.id,
+            email: user.email!,
+            name: formData.name,
+            phone: formData.phone,
+            role: formData.role,
+            status: 'pending'
+          }, { onConflict: 'id' })
+        
+        if (profileError) {
+          console.error("Profile creation error:", profileError)
+          // Continue anyway - the trigger might still work
+        }
+      } catch (profileErr) {
+        console.error("Unexpected error creating profile:", profileErr)
+        // Continue anyway
+      }
+
+      // 3. Insert Application Data (Notes, Portfolio)
       // We use a separate table for this to keep the core user record clean
-      const { error: appError } = await supabase
+      const { error: _ } = await supabase
         .from('application_data')
         .insert({
           user_id: user.id,
@@ -57,7 +79,7 @@ export default function SignupPage() {
           notes: formData.notes
         })
 
-      // 3. Trigger Welcome Email
+      // 4. Trigger Welcome Email
       try {
         await fetch('/api/notify/welcome', {
           method: 'POST',
@@ -71,7 +93,8 @@ export default function SignupPage() {
         console.error("Welcome email failed:", err)
       }
 
-      // 4. Redirect to dashboard immediately
+      // 5. Redirect to dashboard
+      // Note: Users will have 'pending' status until approved by owner
       router.push('/dashboard/employee')
     } else {
       setLoading(false)

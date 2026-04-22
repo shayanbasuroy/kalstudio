@@ -1,19 +1,29 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Search, Building2, UserPlus, Loader2 } from 'lucide-react'
+import { Plus, Search, Building2, UserPlus, Loader2, XCircle } from 'lucide-react'
+
+interface Client {
+  id: string
+  name: string
+  business: string
+  phone: string
+  status: 'lead' | 'active' | 'lost'
+  created_at: string
+}
 
 export default function EmployeeCRM() {
-  const [clients, setClients] = useState<any[]>([])
+  const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [newClient, setNewClient] = useState({ name: '', business: '', phone: '', status: 'lead' })
   const [saving, setSaving] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
   
   const supabase = createClient()
 
-  const fetchMyClients = async () => {
+  const fetchMyClients = useCallback(async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     const { data } = await supabase
@@ -24,24 +34,29 @@ export default function EmployeeCRM() {
 
     if (data) setClients(data)
     setLoading(false)
-  }
-
+  }, [supabase])
+  
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMyClients()
-  }, [])
+  }, [fetchMyClients])
 
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase
-      .from('clients')
-      .insert([{ ...newClient, added_by: user?.id }])
+    setActionError(null)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase
+        .from('clients')
+        .insert([{ ...newClient, added_by: user?.id }])
 
-    if (!error) {
+      if (error) throw error
       setShowAddModal(false)
       setNewClient({ name: '', business: '', phone: '', status: 'lead' })
       fetchMyClients()
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Failed to add lead')
     }
     setSaving(false)
   }
@@ -108,7 +123,7 @@ export default function EmployeeCRM() {
         ) : (
           <div className="bg-white p-32 text-center">
             <Building2 className="w-12 h-12 text-brand-charcoal/5 mx-auto mb-6" />
-            <p className="text-sm text-brand-charcoal/30 italic">You haven't added any leads yet.</p>
+             <p className="text-sm text-brand-charcoal/30 italic">You haven&apos;t added any leads yet.</p>
           </div>
         )}
       </div>
@@ -143,6 +158,11 @@ export default function EmployeeCRM() {
                   />
                 </div>
               </div>
+              {actionError && (
+                <div className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                  <XCircle className="w-3 h-3" /> {actionError}
+                </div>
+              )}
               <div className="flex gap-4 pt-4">
                 <button 
                   type="button" onClick={() => setShowAddModal(false)}

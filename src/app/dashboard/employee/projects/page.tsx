@@ -1,15 +1,49 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Briefcase, Clock, ArrowUpRight, Loader2, Image as ImageIcon, X, Users, Phone, Mail } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+interface User {
+  id: string
+  name: string
+  phone: string
+  email: string
+}
+
+interface Client {
+  name: string
+}
+
+interface Gig {
+  id: string
+  service_type: string
+  status: string
+  deadline: string | null
+  clients: Client
+  sales: User
+  developer: User
+}
+
+interface Payout {
+  amount: string | number
+  is_paid: boolean
+  proof_url: string | null
+  gigs: Gig
+}
+
+interface EnhancedPayout extends Payout {
+  counterpart: User | null
+}
 
 export default function EmployeeProjects() {
-  const [projects, setProjects] = useState<any[]>([])
+  const [projects, setProjects] = useState<EnhancedPayout[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedProof, setSelectedProof] = useState<string | null>(null)
   const supabase = createClient()
+  const router = useRouter()
 
-    const fetchMyProjects = async () => {
+    const fetchMyProjects = useCallback(async () => {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -33,20 +67,20 @@ export default function EmployeeProjects() {
         .eq('user_id', user.id)
 
       if (data) {
-        // Enhance projects with counterpart info
-        const enhancedData = data.map((p: any) => {
+        const enhancedData = (data as unknown as Payout[]).map((p) => {
           const isSales = p.gigs.sales?.id === user.id
-          const counterpart = isSales ? p.gigs.developer : p.gigs.sales
+          const counterpart = (isSales ? p.gigs.developer : p.gigs.sales) ?? null
           return { ...p, counterpart }
         })
         setProjects(enhancedData)
       }
       setLoading(false)
-    }
+    }, [supabase])
 
     useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchMyProjects()
-    }, [])
+    }, [fetchMyProjects])
 
     return (
       <div className="space-y-12 animate-in fade-in duration-700 pb-20">
@@ -61,7 +95,7 @@ export default function EmployeeProjects() {
             </h1>
           </div>
           <div className="max-w-[200px] text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic">
-            "Your work is the physical manifestation of our brand promise."
+            &ldquo;Your work is the physical manifestation of our brand promise.&rdquo;
           </div>
         </div>
 
@@ -71,24 +105,24 @@ export default function EmployeeProjects() {
             <div className="col-span-full py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-brand-gold" /></div>
           ) : projects.length > 0 ? (
             projects.map((p) => (
-              <div key={p.gigs.id} className="bg-white border border-brand-charcoal/10 p-6 md:p-10 group hover:border-brand-gold transition-all flex flex-col justify-between shadow-sm">
+               <div key={p.gigs.id} className="bg-white border border-brand-charcoal/10 p-6 md:p-10 group hover:border-brand-gold transition-all flex flex-col justify-between shadow-sm">
                 <div>
                   <div className="flex justify-between items-start mb-10">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-brand-gold">
                         <Briefcase className="w-3 h-3" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{p.gigs.service_type}</span>
+                         <span className="text-[9px] font-bold uppercase tracking-widest">{p.gigs.service_type}</span>
                       </div>
-                      <h3 className="text-3xl font-bold tracking-tighter text-brand-charcoal leading-none">{p.gigs.clients.name}</h3>
+                       <h3 className="text-3xl font-bold tracking-tighter text-brand-charcoal leading-none">{p.gigs.clients?.name}</h3>
                     </div>
                     <div className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 border whitespace-nowrap ${
-                      p.gigs.status === 'completed' ? 'border-brand-sage text-brand-sage' : 'border-brand-gold text-brand-gold'
+                       p.gigs.status === 'completed' ? 'border-brand-sage text-brand-sage' : 'border-brand-gold text-brand-gold'
                     }`}>
                       {p.gigs.status.replace('_', ' ')}
                     </div>
                   </div>
 
-                  {/* Coordination Section - THE REQUESTED FEATURE */}
+                  {/* Coordination Section */}
                   {p.counterpart && (
                     <div className="mb-8 p-6 bg-brand-offwhite border border-brand-charcoal/5 rounded-2xl relative overflow-hidden group/team">
                       <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -151,7 +185,10 @@ export default function EmployeeProjects() {
                     )}
                   </div>
                   
-                  <button className="w-full py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-offwhite bg-brand-charcoal hover:bg-brand-gold transition-colors flex items-center justify-center gap-2 rounded-xl shadow-xl shadow-brand-charcoal/5">
+                  <button
+                    onClick={() => router.push(`/dashboard/owner/projects/${p.gigs.id}`)}
+                    className="w-full py-5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-offwhite bg-brand-charcoal hover:bg-brand-gold transition-colors flex items-center justify-center gap-2 rounded-xl shadow-xl shadow-brand-charcoal/5"
+                  >
                     Project Workspace <ArrowUpRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -174,11 +211,12 @@ export default function EmployeeProjects() {
               <X className="w-8 h-8 md:w-10 md:h-10" />
             </button>
             <div className="relative w-full max-w-4xl h-full flex items-center justify-center">
-              <img 
-                src={selectedProof} 
-                alt="Payment Proof" 
-                className="max-w-full max-h-full object-contain shadow-2xl border border-white/10 rounded-lg"
-              />
+               {/* eslint-disable-next-line @next/next/no-img-element */}
+               <img 
+                 src={selectedProof} 
+                 alt="Payment Proof" 
+                 className="max-w-full max-h-full object-contain shadow-2xl border border-white/10 rounded-lg"
+               />
             </div>
           </div>
         )}

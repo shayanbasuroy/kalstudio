@@ -36,33 +36,65 @@ export default function LoginPage() {
 
     if (user) {
       // 1. Fetch role and status
-      let { data: profile, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('users')
         .select('role, status')
         .eq('id', user.id)
         .single()
+      let profile = profileData
 
       // 2. AUTO-REPAIR: Gracefully handle missing profiles or race conditions with the trigger
-      if (profileError || !profile) {
-        const { data: newProfile, error: repairError } = await supabase
-          .from('users')
-          .upsert({ 
-            id: user.id, 
-            email: user.email!, 
-            name: user.user_metadata?.full_name || 'New User',
-            role: user.user_metadata?.role || 'sales',
-            status: 'pending'
-          }, { onConflict: 'id' })
-          .select('role, status')
-          .single()
-        
-        if (repairError) {
-          console.error("Repair error:", repairError)
-          setError("Profile sync failed. Please contact support.")
+      if (profileError || !profileData) {
+        try {
+          // Extract metadata with fallbacks
+          const metadata = user.user_metadata || {}
+          const userName = metadata.full_name || metadata.name || 'New User'
+          const userRole = metadata.role || 'sales'
+          const userPhone = metadata.phone || ''
+          
+          // Validate role is a valid enum value
+          const validRoles = ['owner', 'sales', 'developer']
+          const safeRole = validRoles.includes(userRole) ? userRole : 'sales'
+          
+          const { data: newProfile, error: repairError } = await supabase
+            .from('users')
+            .upsert({ 
+              id: user.id, 
+              email: user.email!, 
+              name: userName,
+              phone: userPhone,
+              role: safeRole,
+              status: 'pending'
+            }, { onConflict: 'id' })
+            .select('role, status')
+            .single()
+          
+          if (repairError) {
+            console.error("Repair error details:", repairError)
+            
+            // Special handling for RLS recursion error
+            if (repairError.message.includes('infinite recursion detected in policy')) {
+              setError(`Database policy error detected. This requires a SQL fix. Please run the fix script in Supabase SQL Editor:
+              
+              1. Open Supabase Dashboard → SQL Editor
+              2. Copy contents from: /supabase/fix_rls_recursion_v2.sql
+              3. Run the script
+              4. Try logging in again
+              
+              Error details: ${repairError.message}`)
+            } else {
+              setError(`Profile sync failed: ${repairError.message}. Please contact support.`)
+            }
+            setLoading(false)
+            return
+          }
+          profile = newProfile
+        } catch (catchError) {
+          console.error("Unexpected error during profile repair:", catchError)
+          setError("Unexpected error during profile creation. Please contact support.")
           setLoading(false)
           return
         }
-        profile = newProfile
       }
 
       if (profile?.role === 'owner') {

@@ -1,7 +1,7 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Search, Filter, Phone, Building2, UserPlus, Loader2, AlertCircle } from 'lucide-react'
+import { Plus, Search, Phone, Building2, UserPlus, Loader2, AlertCircle } from 'lucide-react'
 
 interface Client {
   id: string
@@ -20,23 +20,26 @@ export default function ClientsPage() {
   const [newClient, setNewClient] = useState({ name: '', business: '', phone: '', status: 'lead' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'lead' | 'active' | 'lost'>('all')
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   
   const supabase = createClient()
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (data) setClients(data as any)
+    if (data) setClients(data as Client[])
     setLoading(false)
-  }
+  }, [supabase])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchClients()
-  }, [])
+  }, [fetchClients])
 
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,9 +68,27 @@ export default function ClientsPage() {
     setSaving(false)
   }
 
+  const handleUpdateClient = async (clientId: string, status: Client['status']) => {
+    setSaving(true)
+    setError(null)
+    const { error } = await supabase
+      .from('clients')
+      .update({ status })
+      .eq('id', clientId)
+    
+    if (error) {
+      setError(error.message)
+    } else {
+      setEditingClient(null)
+      fetchClients()
+    }
+    setSaving(false)
+  }
+
   const filteredClients = clients.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.business.toLowerCase().includes(searchTerm.toLowerCase())
+    (c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     c.business.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (statusFilter === 'all' || c.status === statusFilter)
   )
 
   return (
@@ -103,9 +124,16 @@ export default function ClientsPage() {
           />
         </div>
         <div className="flex gap-4 w-full md:w-auto">
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 border border-brand-charcoal/10 text-[10px] font-bold uppercase tracking-widest hover:border-brand-gold transition-colors">
-            <Filter className="w-3 h-3" /> Filter
-          </button>
+           <select 
+             value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 border border-brand-charcoal/10 text-[10px] font-bold uppercase tracking-widest hover:border-brand-gold transition-colors bg-white"
+           >
+             <option value="all">All Status</option>
+             <option value="lead">Lead</option>
+             <option value="active">Active</option>
+             <option value="lost">Lost</option>
+           </select>
           <div className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40 self-center">
             {filteredClients.length} Records Found
           </div>
@@ -139,9 +167,9 @@ export default function ClientsPage() {
               </div>
 
               <div className="text-right">
-                <button className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/20 hover:text-brand-charcoal transition-colors">
-                  Edit Profile
-                </button>
+                 <button onClick={() => setEditingClient(client)} className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/20 hover:text-brand-charcoal transition-colors">
+                   Edit Profile
+                 </button>
               </div>
             </div>
           ))
@@ -206,6 +234,59 @@ export default function ClientsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Client Modal */}
+      {editingClient && (
+        <div className="fixed inset-0 bg-brand-charcoal/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-md rounded-3xl p-10 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h2 className="text-3xl font-bold tracking-tighter text-brand-charcoal mb-8 italic">Update Status.</h2>
+            
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-100 flex items-center gap-3 text-red-500 rounded-xl">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40 mb-2">Client</p>
+                <p className="text-xl font-bold text-brand-charcoal">{editingClient.name}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40">{editingClient.business}</p>
+              </div>
+              
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40 mb-2 block">Status</label>
+                <select 
+                  value={editingClient.status}
+                  onChange={(e) => setEditingClient({...editingClient, status: e.target.value as Client['status']})}
+                  className="w-full px-4 py-3 bg-brand-offwhite border-none rounded-xl text-sm focus:ring-1 focus:ring-brand-gold outline-none"
+                >
+                  <option value="lead">Lead</option>
+                  <option value="active">Active</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button" onClick={() => setEditingClient(null)}
+                  className="flex-1 py-4 text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/40 hover:text-brand-charcoal transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleUpdateClient(editingClient.id, editingClient.status)}
+                  disabled={saving}
+                  className="flex-1 py-4 bg-brand-charcoal text-brand-offwhite rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-charcoal/10"
+                >
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Update Status'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

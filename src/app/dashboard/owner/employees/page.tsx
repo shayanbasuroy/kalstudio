@@ -1,7 +1,7 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Users, CheckCircle, XCircle, ExternalLink, Mail, Phone, Loader2 } from 'lucide-react'
+import { CheckCircle, XCircle, ExternalLink, Mail, Phone, Loader2 } from 'lucide-react'
 
 interface EmployeeProfile {
   id: string
@@ -22,7 +22,7 @@ export default function EmployeeManagementPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const supabase = createClient()
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('users')
@@ -36,14 +36,15 @@ export default function EmployeeManagementPage() {
     if (error) {
       console.error("Staff fetch error:", error)
     } else if (data) {
-      setEmployees(data as any)
+      setEmployees(data as EmployeeProfile[])
     }
     setLoading(false)
-  }
+  }, [supabase])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEmployees()
-  }, [])
+  }, [fetchEmployees])
 
   const handleUpdateStatus = async (id: string, status: 'active' | 'rejected') => {
     setActionLoading(id)
@@ -119,7 +120,7 @@ export default function EmployeeManagementPage() {
           </h1>
         </div>
         <div className="max-w-[200px] text-[11px] text-brand-charcoal/40 font-medium leading-relaxed italic">
-          "The strength of the studio is the collective talent of its creators."
+          &ldquo;The strength of the studio is the collective talent of its creators.&rdquo;
         </div>
       </div>
 
@@ -168,8 +169,8 @@ export default function EmployeeManagementPage() {
                     {app.application_data?.notes && (
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-widest text-brand-charcoal/30 mb-2 block">Cover Note</span>
-                        <p className="text-xs text-brand-charcoal/70 leading-relaxed italic">
-                          "{app.application_data.notes}"
+                         <p className="text-xs text-brand-charcoal/70 leading-relaxed italic">
+                          &ldquo;{app.application_data.notes}&rdquo;
                         </p>
                       </div>
                     )}

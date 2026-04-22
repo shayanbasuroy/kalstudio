@@ -2,8 +2,21 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Check, Users, Briefcase, IndianRupee, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, IndianRupee, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+
+interface Client {
+  id: string
+  name: string
+  business: string
+}
+
+interface Staff {
+  id: string
+  name: string
+  role: string
+  email: string
+}
 
 export default function NewGigPage() {
   const [step, setStep] = useState(1)
@@ -11,8 +24,8 @@ export default function NewGigPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const [clients, setClients] = useState<any[]>([])
-  const [staff, setStaff] = useState<any[]>([])
+  const [clients, setClients] = useState<Client[]>([])
+  const [staff, setStaff] = useState<Staff[]>([])
   
   const [formData, setFormData] = useState({
     client_id: '',
@@ -40,7 +53,7 @@ export default function NewGigPage() {
       setLoading(false)
     }
     fetchData()
-  }, [])
+  }, [supabase])
 
   const salesPeople = staff.filter(s => s.role === 'sales')
   const developers = staff.filter(s => s.role === 'developer')
@@ -122,10 +135,10 @@ export default function NewGigPage() {
       }
 
       router.push('/dashboard/owner/projects')
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.")
-      setSaving(false)
-    }
+      } catch (_err: unknown) {
+       setError(_err instanceof Error ? _err.message : "An unexpected error occurred.")
+       setSaving(false)
+     }
   }
 
   if (loading) return <div className="p-32 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-brand-gold" /></div>
