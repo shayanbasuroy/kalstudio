@@ -11,7 +11,12 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
-      smoothWheel: true,
+      smoothWheel: false,
+      syncTouch: false,
+      wheelMultiplier: 0.5,
+      touchMultiplier: 1,
+      gestureOrientation: 'vertical',
+      touchInertiaExponent: 1.7,
     })
 
     // 2. Sync ScrollTrigger with Lenis
