@@ -15,21 +15,22 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-[100] w-full bg-brand-offwhite/80 backdrop-blur-md border-b border-brand-charcoal/5">
+    <nav className="sticky top-0 z-[100] w-full bg-brand-offwhite/80 backdrop-blur-md border-b border-brand-charcoal/5" aria-label="Main Navigation">
       <div className="w-full max-w-[1800px] mx-auto flex items-center justify-between px-6 md:px-16 lg:px-24 py-4 md:py-5">
-        <Link href="/" className="flex items-center gap-3 md:gap-4 z-[110]">
-          <Image src="/logo-icon.png" alt="Kal Studio Icon" width={60} height={60} className="w-12 md:w-20 h-12 md:h-20 object-contain" />
+        <Link href="/" className="flex items-center gap-3 md:gap-4 z-[110]" aria-label="Kal Studio Home">
+          <Image src="/logo-icon.png" alt="Kal Studio — Web Design Agency" width={60} height={60} className="w-12 md:w-20 h-12 md:h-20 object-contain" />
           <Image src="/logo-text.png" alt="Kal Studio" width={220} height={60} className="w-auto h-12 md:h-16 object-contain" />
         </Link>
 
         <div className="flex items-center gap-10">
-          <div className="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-brand-charcoal">
+          <div className="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-brand-charcoal" role="menubar">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 href={link.href} 
                 className="hover:text-brand-gold transition-colors"
                 onClick={() => setIsOpen(false)}
+                role="menuitem"
               >
                 {link.name}
               </Link>

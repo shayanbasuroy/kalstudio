@@ -14,21 +14,21 @@ export default function Footer() {
             <div className="flex items-center gap-4 mb-6">
               <Image
                 src="/logo-icon.png"
-                alt="Kal Studio Icon"
+                alt="Kal Studio — Web Design and Development Agency"
                 width={48}
                 height={48}
                 className="w-12 h-12 object-contain brightness-0 invert"
               />
               <Image
                 src="/logo-text.png"
-                alt="Kal Studio"
+                alt="Kal Studio — Website Design Company for Modern Brands"
                 width={180}
                 height={52}
                 className="h-10 w-auto object-contain brightness-0 invert"
               />
             </div>
             <p className="text-sm text-brand-offwhite/50 leading-relaxed">
-              A creative studio transforming bold ideas into powerful digital structures. We help Kolkata&apos;s modern brands build identity, impact, and growth.
+              A web design and development studio transforming bold ideas into powerful digital structures. We help businesses in India and globally build custom websites, landing pages, and digital identities that drive growth.
             </p>
           </div>
 
@@ -46,18 +46,19 @@ export default function Footer() {
             <div>
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-brand-gold mb-6">Services</h4>
               <ul className="space-y-4 text-sm font-medium text-brand-offwhite/60">
-                <li>Landing Pages</li>
-                <li>Multi-Page Sites</li>
-                <li>Photography</li>
-                <li>Custom Apps</li>
+                <li><a href="/#services" className="hover:text-brand-offwhite transition-colors">Web Design & Development</a></li>
+                <li><a href="/#services" className="hover:text-brand-offwhite transition-colors">Landing Page Design</a></li>
+                <li><a href="/#services" className="hover:text-brand-offwhite transition-colors">Multi-Page Websites</a></li>
+                <li><a href="/#services" className="hover:text-brand-offwhite transition-colors">UI/UX Design</a></li>
+                <li><a href="/#services" className="hover:text-brand-offwhite transition-colors">Website Optimization</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-brand-gold mb-6">Connect</h4>
               <ul className="space-y-4 text-sm font-medium text-brand-offwhite/60">
-                <li><a href="#" className="hover:text-brand-offwhite transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-brand-offwhite transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-brand-offwhite transition-colors">LinkedIn</a></li>
+                <li><a href="https://www.instagram.com/kalstudio" target="_blank" rel="noopener noreferrer" className="hover:text-brand-offwhite transition-colors">Instagram</a></li>
+                <li><a href="https://www.twitter.com/kalstudio" target="_blank" rel="noopener noreferrer" className="hover:text-brand-offwhite transition-colors">Twitter</a></li>
+                <li><a href="https://www.linkedin.com/company/kalstudio" target="_blank" rel="noopener noreferrer" className="hover:text-brand-offwhite transition-colors">LinkedIn</a></li>
                 <li>
                   <Link href="/login" className="text-brand-gold hover:text-brand-offwhite transition-colors font-bold">
                     Client Login →

@@ -93,9 +93,9 @@ export default function Hero() {
             <h1 className="hero-kal text-[70px] sm:text-[100px] md:text-[180px] lg:text-[240px] font-bold tracking-tighter text-brand-charcoal leading-[0.8] mb-2 md:mb-4">
               Kal
             </h1>
-            <h1 className="hero-studio text-[50px] sm:text-[70px] md:text-[120px] lg:text-[160px] font-bold tracking-tighter text-brand-gold leading-[0.8]">
+            <span className="hero-studio text-[50px] sm:text-[70px] md:text-[120px] lg:text-[160px] font-bold tracking-tighter text-brand-gold leading-[0.8] block">
               Studio©
-            </h1>
+            </span>
           </div>
 
           <div className="hero-since mt-6 md:absolute md:top-10 md:right-16 lg:right-32 text-brand-charcoal/60 text-[10px] md:text-xs font-semibold tracking-wider font-mono uppercase">
@@ -140,11 +140,15 @@ export default function Hero() {
           </div>
 
           {/* Left Social Links */}
-          <div className="mt-16 md:mt-32 flex flex-row md:flex-col gap-6 md:gap-2">
-            {['Instagram', 'Twitter', 'LinkedIn'].map((link) => (
-              <a key={link} href="#" className="hero-social flex items-center gap-2 text-[10px] font-bold text-brand-charcoal/40 hover:text-brand-gold tracking-widest uppercase transition-colors">
+          <div className="mt-16 md:mt-32 flex flex-row md:flex-col gap-6 md:gap-2" aria-label="Social Media Links">
+            {[
+              { name: 'Instagram', url: 'https://www.instagram.com/kalstudio' },
+              { name: 'Twitter', url: 'https://www.twitter.com/kalstudio' },
+              { name: 'LinkedIn', url: 'https://www.linkedin.com/company/kalstudio' },
+            ].map((link) => (
+              <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hero-social flex items-center gap-2 text-[10px] font-bold text-brand-charcoal/40 hover:text-brand-gold tracking-widest uppercase transition-colors" aria-label={`Visit Kal Studio on ${link.name}`}>
                 <span className="w-1 h-1 bg-brand-gold rounded-full"></span>
-                {link}
+                {link.name}
               </a>
             ))}
           </div>

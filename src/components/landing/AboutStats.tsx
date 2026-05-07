@@ -120,11 +120,11 @@ export default function AboutStats() {
         <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-24 mb-20 md:mb-32 items-start">
           {/* Left: Mission */}
           <div className="about-mission relative w-full">
-            <h3 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-charcoal mb-4">
+            <h2 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-charcoal mb-4">
               Our Mission
-            </h3>
+            </h2>
              <p className="text-xs md:text-sm text-brand-charcoal/60 max-w-sm mb-8 leading-relaxed">
-               Our goal is to create work that looks beautiful, performs effectively, and leaves a lasting impact on your brand&apos;s digital journey.
+               Our goal is to create web design and development work that looks beautiful, performs effectively, and leaves a lasting impact on your brand&apos;s digital journey. We build websites that drive business growth.
              </p>
             <div className="w-full max-w-md aspect-square bg-brand-offwhite relative rounded border border-brand-charcoal/10 overflow-hidden shadow-sm perspective-1000">
               {/* Arch shape */}
@@ -175,15 +175,15 @@ export default function AboutStats() {
         {/* Stats Section — improved layout */}
         <div className="grid lg:grid-cols-2 gap-12 md:gap-24 mb-20 md:mb-32 items-center">
           <div className="about-expertise-text text-center lg:text-left">
-            <h3 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-charcoal mb-6">
+            <h2 className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-charcoal mb-6">
               Proven Scale
-            </h3>
+            </h2>
             <p className="text-xl md:text-3xl font-medium text-brand-charcoal leading-snug max-w-xl mx-auto lg:mx-0">
               With a background in building{" "}
               <span className="font-bold underline decoration-brand-gold decoration-2 underline-offset-4">
-                enterprise solutions,
+                enterprise-grade websites and applications,
               </span>{" "}
-              we bring elite engineering to businesses of all sizes.
+              we bring elite web development and design engineering to businesses of all sizes in India and worldwide.
             </p>
           </div>
 

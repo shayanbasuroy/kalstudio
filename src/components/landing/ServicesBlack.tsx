@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useRef } from 'react'
+import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -9,27 +10,46 @@ const servicesList = [
   {
     title: "Digital Architecture",
     points: [
-      "Grow your online presence organically",
-      "Engage with your audience regularly",
-      "Utilize relevant aesthetic layouts",
-      "Robust backend integrations"
+      "Scalable website architecture for growing businesses",
+      "Custom backend integrations and CMS solutions",
+      "Conversion-optimized user journeys",
+      "Cloud hosting and performance optimization"
     ],
   },
   {
     title: "Web Design & Development",
     points: [
-      "Responsive websites",
-      "Fast-loading pages",
-      "Clean, modern layouts",
-      "SEO-friendly structure"
+      "Responsive, mobile-first website design",
+      "Fast-loading, performance-optimized pages",
+      "Clean, modern UI with brand-focused layouts",
+      "SEO-friendly semantic HTML structure"
     ],
   },
   {
     title: "UI/UX Design",
     points: [
-      "User-friendly interfaces",
-      "Intuitive navigation",
-      "Mobile-first design"
+      "User research and conversion-focused design",
+      "Intuitive navigation and information architecture",
+      "Wireframing, prototyping, and usability testing",
+      "Mobile-first responsive interfaces"
+    ],
+  },
+  {
+    title: "Landing Pages & Funnels",
+    points: [
+      "High-conversion landing page design",
+      "Multi-page sales funnels and lead generation",
+      "A/B testing and conversion rate optimization",
+      "CTA optimization and user flow analysis"
+    ],
+  },
+  {
+    title: "Website Optimization",
+    points: [
+      "Core Web Vitals and page speed optimization",
+      "Technical SEO audits and implementation",
+      "Accessibility (WCAG) compliance",
+      "Analytics setup and performance tracking"
     ],
   }
 ]
@@ -115,6 +135,15 @@ export default function ServicesBlack() {
               </ul>
             </div>
           ))}
+
+          <div className="service-row pt-6 text-center lg:text-left">
+            <Link
+              href="#contact"
+              className="inline-flex items-center gap-3 bg-brand-gold text-brand-charcoal px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-white transition-all shadow-2xl shadow-brand-gold/20"
+            >
+              Start Your Project
+            </Link>
+          </div>
         </div>
 
       </div>

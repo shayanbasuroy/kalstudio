@@ -104,3 +104,62 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Comment notifications use existing `/api/notify/assignment` endpoint
 - Status change notifications should use same pattern via `/api/notify/assignment` or dedicated endpoint
 <!-- END:session-2026-04-22-features -->
+
+<!-- BEGIN:session-2026-05-07-seo -->
+# Session: May 7, 2026 — SEO Gold Standard
+
+## Files created/modified
+
+### New files
+
+| File | Purpose |
+|---|---|
+| `src/components/seo/JsonLd.tsx` | JSON-LD structured data (WebSite, LocalBusiness, Service × 3, FAQPage with 5 Q&A) |
+| `src/components/seo/Analytics.tsx` | Google Analytics 4 page view tracking with Suspense |
+| `src/app/sitemap.ts` | Dynamic XML sitemap (/, /login, /signup) |
+| `src/app/robots.ts` | Robots.txt (allow all, disallow /dashboard/ and /api/) |
+| `src/app/(auth)/login/layout.tsx` | Page-specific metadata for login |
+| `src/app/(auth)/signup/layout.tsx` | Page-specific metadata for signup |
+| `src/app/(public)/layout.tsx` | Route group layout |
+
+### Modified files
+
+| File | Changes |
+|---|---|
+| `src/app/layout.tsx` | Full SEO metadata: title, description, keywords (22), OG tags, Twitter card, robots directives, canonical URL, GSC verification, GA4 script, JSON-LD injection |
+| `src/app/(public)/page.tsx` | Added page-specific metadata; re-added Portfolio component to the page |
+| `src/components/landing/Hero.tsx` | Fixed duplicate h1 → h1 + span; social links now use actual URLs |
+| `src/components/landing/Navbar.tsx` | Added `aria-label`, `role="menubar"`, `role="menuitem"`, improved image alt text |
+| `src/components/landing/AboutStats.tsx` | Fixed heading hierarchy (h3→h2); keyword-optimized copy ("enterprise-grade websites and applications", "India and worldwide") |
+| `src/components/landing/ServicesBlack.tsx` | Expanded from 3 to 5 services; added "Landing Pages & Funnels" and "Website Optimization" sections; added CTA button linking to contact; keyword-rich bullet points |
+| `src/components/landing/Contact.tsx` | Updated heading from "Let's Build Together" to "Need a Website? Let's Build It."; keyword-optimized description |
+| `src/components/landing/Footer.tsx` | Improved image alt text; services column now links to /#services; social links use real URLs with `target="_blank" rel="noopener noreferrer"`; keyword-optimized description |
+
+## SEO checklist
+
+- [x] Root layout metadata (title, description, 22 keywords, OG, Twitter, robots)
+- [x] Canonical URL (`<link rel="canonical">`)
+- [x] Sitemap.xml (dynamic, 3 URLs)
+- [x] Robots.txt (allows crawlers, disallows dashboard/api)
+- [x] JSON-LD structured data:
+  - [x] WebSite with Organization publisher
+  - [x] LocalBusiness (Kolkata, IN) with address, geo, hours, contacts
+  - [x] Service × 3 (Web Design, Digital Architecture, UI/UX)
+  - [x] FAQPage with 5 questions
+- [x] Google Search Console verification (via `NEXT_PUBLIC_GOOGLE_VERIFICATION`)
+- [x] Google Analytics 4 (via `NEXT_PUBLIC_GA_ID`)
+- [x] Semantic HTML (single h1, proper heading hierarchy, aria-labels, nav landmarks)
+- [x] Services expanded from 3→5 with keyword-rich descriptions
+- [x] Social links use real external URLs with proper rel attributes
+- [x] Portfolio section re-added to landing page
+
+## New environment variables
+
+Add to `.env.local`:
+
+```
+NEXT_PUBLIC_GOOGLE_VERIFICATION=xxxxx   # Google Search Console verification code
+```
+
+This is optional — the site works without it (fallback placeholder used).
+<!-- END:session-2026-05-07-seo -->

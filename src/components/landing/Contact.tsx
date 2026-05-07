@@ -62,11 +62,11 @@ export default function Contact() {
             <span className="w-4 h-px bg-brand-gold"></span> Start a Project
           </p>
           <h2 className="contact-heading text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-brand-charcoal leading-[1] mb-10">
-            Let&apos;s Build<br />
-            <span className="text-brand-gold">Together.</span>
+            Need a Website?<br />
+            <span className="text-brand-gold">Let&apos;s Build It.</span>
           </h2>
           <p className="text-sm text-brand-charcoal/60 max-w-md leading-relaxed mb-12">
-            Whether you need a landing page, a full digital ecosystem, or a custom app — Kal Studio delivers work that performs.
+            Whether you need a custom landing page, a multi-page business website, a full digital ecosystem, or website optimization — Kal Studio delivers web design and development work that performs and ranks.
           </p>
           <div className="contact-card bg-white border border-brand-charcoal/5 p-8 max-w-sm shadow-sm">
             <h3 className="text-base font-bold mb-2">Kal Studio.</h3>
